@@ -18,3 +18,19 @@ a,
     background-color: hsla(160, 100%, 37%, 0.2);
   }
 }
+
+.backgroundSemiTransparent {
+  -webkit-box-shadow: 17px 20px 40px rgba(0,0,0,.21);
+    box-shadow: 17px 20px 40px rgba(0,0,0,.21);
+    border-radius: 22px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    background-color: rgba(0,0,0,.16);
+}
