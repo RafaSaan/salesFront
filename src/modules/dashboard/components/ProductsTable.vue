@@ -24,6 +24,7 @@
       </div>
       <div class="headersColumns">
         <span class="nameHeader">Name/Description</span>
+        <span class="amountHeader">Quantity</span>
         <span class="amountHeader">Amount</span>
         <span class="amountHeader">Amount wholesale</span>
         <span class="hasWholesaleHeader">Has wholesale</span>
@@ -36,6 +37,7 @@
             <span class="nameItem">name</span>
             <div class="descriptionItem">description</div>
           </div>
+          <span class="amountHeader defaltFontIem">Quantity</span>
           <span class="amountHeader defaltFontIem">Amount</span>
           <span class="amountHeader defaltFontIem">Amount wholesale</span>
           <span class="hasWholesaleHeader defaltFontIem">Has wholesale</span>
@@ -51,19 +53,34 @@
         </div>
       </div>
     </div>
-    <CreateProduct
+    <UpdateOrCreateProduct
       v-if="isModalUpdateOrCreateOpen"
       @closeUpdateOrCreateModal="closeUpdateOrCreateModal"
+      :isEdit="isEditProduct"
     />
+
+    <!-- <ToastNotification/>
+    <button @click="successToast">success</button>
+    <button @click="warningToast">warning</button>
+    <button @click="errorToast">error</button> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import CreateProduct from '../components/CreateProduct.vue'
+import UpdateOrCreateProduct from '../components/UpdateOrCreateProduct.vue'
 import { ref } from 'vue';
 import type {Ref} from 'vue'
 const search: Ref<string> = ref('')
+const isEditProduct: Ref<boolean> = ref(false)
 const isModalUpdateOrCreateOpen: Ref<boolean> = ref(false)
+// import ToastNotification from "@/components/ToastNotification.vue";
+// import useToasterStore from "@/stores/useToastStore";
+
+// const toasterStore = useToasterStore();
+
+// const successToast = () => toasterStore.success({ text: "Succcess" });
+// const warningToast = () => toasterStore.warning({ text: "warning" });
+// const errorToast = () => toasterStore.error({ text: "Error" });
 
 function openUpdateOrCreateModal():void {
   isModalUpdateOrCreateOpen.value = true
