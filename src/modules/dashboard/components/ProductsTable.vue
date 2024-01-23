@@ -56,13 +56,12 @@
     <UpdateOrCreateProduct
       v-if="isModalUpdateOrCreateOpen"
       @closeUpdateOrCreateModal="closeUpdateOrCreateModal"
+      @successToast="successToast"
+      @errorToast="errorToast"
       :isEdit="isEditProduct"
     />
 
-    <!-- <ToastNotification/>
-    <button @click="successToast">success</button>
-    <button @click="warningToast">warning</button>
-    <button @click="errorToast">error</button> -->
+    <ToastNotification/>
   </div>
 </template>
 
@@ -73,14 +72,13 @@ import type {Ref} from 'vue'
 const search: Ref<string> = ref('')
 const isEditProduct: Ref<boolean> = ref(false)
 const isModalUpdateOrCreateOpen: Ref<boolean> = ref(false)
-// import ToastNotification from "@/components/ToastNotification.vue";
-// import useToasterStore from "@/stores/useToastStore";
+import ToastNotification from "@/components/ToastNotification.vue";
+import useToasterStore from "@/stores/useToastStore";
 
-// const toasterStore = useToasterStore();
+const toasterStore = useToasterStore();
 
-// const successToast = () => toasterStore.success({ text: "Succcess" });
-// const warningToast = () => toasterStore.warning({ text: "warning" });
-// const errorToast = () => toasterStore.error({ text: "Error" });
+const successToast = () => toasterStore.success({ text: "Successfully created product" });
+const errorToast = () => toasterStore.error({ text: "Something went wrong" });
 
 function openUpdateOrCreateModal():void {
   isModalUpdateOrCreateOpen.value = true

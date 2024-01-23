@@ -4,7 +4,15 @@ export interface Product {
   quantity: number
   amount: number
   hasWholesale: boolean
-  amountWholesale: number
+  amountWholesale?: number
   status: string
-  imageUrl: string
+  imageUrl?: string
+}
+export interface CreateProductPayload {
+  name: string
+  description: string
+  quantity: number
+  amount: number
+  hasWholesale: boolean
+  amountWholesale?: number
 }

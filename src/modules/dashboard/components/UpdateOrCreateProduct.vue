@@ -1,14 +1,24 @@
 <template>
   <div class="createProductModal">
-    <form class="createProductContainer">
+    <form class="createProductContainer" @submit.prevent="saveOrUpdateProduct">
       <span class="titleModal">{{ isEdit ? 'Edit Product' : 'Add Product' }}</span>
       <div class="inputContainer">
         <span>Name</span>
-        <input type="text" placeholder="Product name..." v-model="product.name">
+        <input
+          type="text"
+          placeholder="Product name..."
+          v-model="product.name"
+          @input="validateForm"
+        >
       </div>
       <div class="inputContainer">
         <span>Description</span>
-        <input type="text" placeholder="Product description..." v-model="product.description">
+        <input
+          type="text"
+          placeholder="Product description..."
+          v-model="product.description"
+          @input="validateForm"
+        >
       </div>
       <div class="inputContainer">
         <span>Quantity</span>
@@ -35,8 +45,12 @@
         >
       </div>
       <div class="btnContainer">
-        <button class="btnCancel" @click="closeModal">cancel</button>
-        <button class="btnSave">{{ isEdit ? 'edit' : 'save'}}</button>
+        <button class="btnCancel" type="reset" @click="closeModal">cancel</button>
+        <button
+          class="btnSave"
+          :class="!isCompleteForm ? 'buttonDisabled' : ''">
+            {{ isEdit ? 'edit' : 'save'}}
+        </button>
       </div>
     </form>
   </div>
@@ -44,30 +58,53 @@
 
 <script setup lang="ts">
 import type { Product} from '../interfaces/index.ts'
-const emit = defineEmits(['closeUpdateOrCreateModal']);
+const emit = defineEmits(['closeUpdateOrCreateModal', 'successToast', 'errorToast']);
 defineProps<{
   isEdit: boolean
 }>()
 import { ref } from 'vue';
 import type {Ref} from 'vue'
+import { createProductHelper } from '../helpers/productsHelper';
 const product: Ref< Product > = ref({
   name: '',
   description: '',
   quantity: 0,
   amount: 0,
   hasWholesale: false,
-  amountWholesale: 0,
+  amountWholesale: undefined,
   status: '',
   imageUrl: ''
 
 })
+const isCompleteForm: Ref<boolean> = ref(false)
+
+function validateForm () {
+  isCompleteForm.value = false
+  if (product.value.name && product.value.description) {
+    isCompleteForm.value = true
+  }
+}
+
+function saveOrUpdateProduct(event: Event):void {
+  event.preventDefault()
+  createProductHelper(product.value).then((success)=> {
+    if (success) {
+      emit('successToast')
+      emit('closeUpdateOrCreateModal')
+    } else {
+      emit('errorToast')
+    }
+  }).catch(()=> {
+    emit('errorToast')
+  })
+}
 function closeModal(event: Event) {
   event.preventDefault()
   emit('closeUpdateOrCreateModal')
 }
 function toggleHasWholesale():void {
   product.value.hasWholesale = !product.value.hasWholesale
-  console.log(product.value)
+  product.value.amountWholesale = undefined
 }
 
 </script>
@@ -186,5 +223,10 @@ input:checked + .slider:before {
 }
 .slider.round:before {
   border-radius: 50%;
+}
+.buttonDisabled {
+  color: #fff;
+  background-color: #CBD5E0;
+  cursor: not-allowed;
 }
 </style>
