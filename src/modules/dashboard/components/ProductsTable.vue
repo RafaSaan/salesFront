@@ -53,13 +53,16 @@
         </div>
       </div>
     </div>
-    <UpdateOrCreateProduct
-      v-if="isModalUpdateOrCreateOpen"
-      @closeUpdateOrCreateModal="closeUpdateOrCreateModal"
-      @successToast="successToast"
-      @errorToast="errorToast"
-      :isEdit="isEditProduct"
-    />
+
+    <Transition name="product">
+      <UpdateOrCreateProduct
+        v-if="isModalUpdateOrCreateOpen"
+        @closeUpdateOrCreateModal="closeUpdateOrCreateModal"
+        @successToast="successToast"
+        @errorToast="errorToast"
+        :isEdit="isEditProduct"
+      />
+    </Transition>
 
     <ToastNotification/>
   </div>
@@ -86,9 +89,23 @@ function openUpdateOrCreateModal():void {
 function closeUpdateOrCreateModal():void {
   isModalUpdateOrCreateOpen.value = false
 }
+
+function getProducts() {
+  
+}
 </script>
 
 <style scoped>
+.product-enter-from,
+.product-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.product-enter-active,
+.product-leave-active {
+  transition: 0.25s ease all;
+}
 .inputSearchContainer {
   display: flex;
   align-items: center;

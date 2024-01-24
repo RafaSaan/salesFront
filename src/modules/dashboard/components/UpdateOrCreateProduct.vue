@@ -1,6 +1,6 @@
 <template>
   <div class="createProductModal">
-    <form class="createProductContainer" @submit.prevent="saveOrUpdateProduct">
+    <form class="createProductContainer" @submit.prevent="createOrUpdateProduct">
       <span class="titleModal">{{ isEdit ? 'Edit Product' : 'Add Product' }}</span>
       <div class="inputContainer">
         <span>Name</span>
@@ -85,7 +85,7 @@ function validateForm () {
   }
 }
 
-function saveOrUpdateProduct(event: Event):void {
+function createOrUpdateProduct(event: Event):void {
   event.preventDefault()
   createProductHelper(product.value).then((success)=> {
     if (success) {

@@ -23,3 +23,22 @@ export const createProductHelper = async(product: Product):Promise<boolean> => {
 
   return success
 }
+export const getProducts = async():Promise<Product[]> => {
+  let products:Product[] = [
+
+  ]
+  try {
+    const url = `${api}/getProducts`
+    const payload:object = {
+      rowsPerPage: 10,
+      page: 1
+    }
+    const { data } = await axios.get(url, {...payload})
+    products = data.products
+  } catch(error) {
+    products = []
+    console.log(error)
+  }
+
+  return products
+}
