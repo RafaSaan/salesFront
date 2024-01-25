@@ -1,7 +1,7 @@
 <template>
   <div class="createProductModal">
     <form class="createProductContainer" @submit.prevent="createOrUpdateProduct">
-      <span class="titleModal">{{ isEdit ? 'Edit Product' : 'Add Product' }}</span>
+      <span class="titleModal">{{ isEdit ? 'Update Product' : 'Create Product' }}</span>
       <div class="inputContainer">
         <span>Name</span>
         <input
@@ -28,11 +28,34 @@
         <span>Amount</span>
         <input type="number" placeholder="Product amount..." v-model="product.amount">
       </div>
+      <div class="inputContainer" v-if="isEdit">
+        <span>Status</span>
+        <div class="statusesContainer">
+          <div
+            class="stautsBadge"
+            @click="setCurrentStatus('in_stock')"
+            :class="currentStatusSelect === 'in_stock' ? 'in_stock' : ''">
+            En existencia
+          </div>
+          <div
+            class="stautsBadge w-90"
+            @click="setCurrentStatus('low_stock')"
+            :class="currentStatusSelect === 'low_stock' ? 'low_stock' : ''">
+            Pocas Existencias
+          </div>
+          <div
+            class="stautsBadge"
+            @click="setCurrentStatus('out_of_stock')"
+            :class="currentStatusSelect === 'out_of_stock' ? 'out_of_stock' : ''">
+            Sin Existencia
+          </div>
+        </div>
+      </div>
       <div class="inputContainer">
         <span>Has wholesale</span>
         <label class="switch">
-          <input type="checkbox">
-          <span class="slider round" @click="toggleHasWholesale"></span>
+          <input type="checkbox" v-model="product.hasWholesale">
+          <span class="slider round"></span>
         </label>
       </div>
       <div class="inputContainer">
@@ -49,7 +72,7 @@
         <button
           class="btnSave"
           :class="!isCompleteForm ? 'buttonDisabled' : ''">
-            {{ isEdit ? 'edit' : 'save'}}
+            {{ isEdit ? 'save' : 'create'}}
         </button>
       </div>
     </form>
@@ -58,13 +81,15 @@
 
 <script setup lang="ts">
 import type { Product} from '../interfaces/index.ts'
-const emit = defineEmits(['closeUpdateOrCreateModal', 'successToast', 'errorToast']);
-defineProps<{
-  isEdit: boolean
+const emit = defineEmits(['closeUpdateOrCreateModal', 'successToast', 'errorToast', 'getProducts']);
+const props = defineProps<{
+  isEdit: boolean,
+  productToEdit: Product
 }>()
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type {Ref} from 'vue'
-import { createProductHelper } from '../helpers/productsHelper';
+import { createProductHelper, updateProductHelper } from '../helpers/productsHelper';
+
 const product: Ref< Product > = ref({
   name: '',
   description: '',
@@ -73,10 +98,24 @@ const product: Ref< Product > = ref({
   hasWholesale: false,
   amountWholesale: undefined,
   status: '',
-  imageUrl: ''
+  imageUrl: '',
+  statusId: ''
 
 })
 const isCompleteForm: Ref<boolean> = ref(false)
+const currentStatusSelect: Ref<string|undefined> = ref('')
+
+onMounted(() => {
+  if (props.isEdit) {
+    isCompleteForm.value = true
+    product.value = {...props.productToEdit}
+    currentStatusSelect.value = props.productToEdit.statusCode
+  }
+})
+
+function setCurrentStatus(status:string):void {
+  currentStatusSelect.value = status
+}
 
 function validateForm () {
   isCompleteForm.value = false
@@ -86,10 +125,19 @@ function validateForm () {
 }
 
 function createOrUpdateProduct(event: Event):void {
+  if (!isCompleteForm.value) return
   event.preventDefault()
+  if (props.isEdit) {
+    updateProduct()
+    return
+  }
+  createProduct()
+}
+function createProduct():void {
   createProductHelper(product.value).then((success)=> {
     if (success) {
       emit('successToast')
+      emit('getProducts')
       emit('closeUpdateOrCreateModal')
     } else {
       emit('errorToast')
@@ -98,18 +146,29 @@ function createOrUpdateProduct(event: Event):void {
     emit('errorToast')
   })
 }
+function updateProduct():void {
+  product.value.statusCode = currentStatusSelect.value
+  updateProductHelper(product.value).then((success)=> {
+    if (success) {
+      emit('successToast')
+      emit('getProducts')
+      emit('closeUpdateOrCreateModal')
+    } else {
+      emit('errorToast')
+    }
+  }).catch(()=> {
+    emit('errorToast')
+  })
+}
+
 function closeModal(event: Event) {
   event.preventDefault()
   emit('closeUpdateOrCreateModal')
 }
-function toggleHasWholesale():void {
-  product.value.hasWholesale = !product.value.hasWholesale
-  product.value.amountWholesale = undefined
-}
 
 </script>
 
-<style>
+<style scoped>
 .createProductModal {
   position: fixed;
   top: 0;
@@ -228,5 +287,36 @@ input:checked + .slider:before {
   color: #fff;
   background-color: #CBD5E0;
   cursor: not-allowed;
+}
+.stautsBadge {
+  display: flex;
+  justify-content: center;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 10px;
+  background-color: #CBD5E0;
+  width: 75px;
+  cursor: pointer;
+}
+.w-90 {
+  width: 90px;
+}
+.in_stock {
+  color: #3BA939;
+  background-color: #EAF8EA;
+}
+.low_stock {
+  color: #CE8623;
+  background-color: #FFF5E8;
+}
+.out_of_stock {
+  color: #E41E12;
+  background-color: #FFE5E4;
+}
+.statusesContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

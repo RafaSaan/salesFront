@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { Product, CreateProductPayload } from "../interfaces"
+import type { Product, CreateProductPayload, UpdateProductPayload } from "../interfaces"
 const api = import.meta.env.VITE_API_ENDPOINT
 
 export const createProductHelper = async(product: Product):Promise<boolean> => {
@@ -23,7 +23,32 @@ export const createProductHelper = async(product: Product):Promise<boolean> => {
 
   return success
 }
-export const getProducts = async():Promise<Product[]> => {
+
+export const updateProductHelper = async(product: Product):Promise<boolean> => {
+  let success:boolean = false
+  try {
+    const url = `${api}/updateProduct`
+    const payload:UpdateProductPayload = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      quantity: product.quantity,
+      amount: product.amount,
+      hasWholesale: product.hasWholesale,
+      amountWholesale: product.amountWholesale,
+      statusCode: product.statusCode
+    }
+    await axios.post(url, {...payload})
+    success = true
+  } catch(error) {
+    success = false
+    console.log(error)
+  }
+
+  return success
+}
+
+export const getProductsHelper = async():Promise<Product[]> => {
   let products:Product[] = [
 
   ]

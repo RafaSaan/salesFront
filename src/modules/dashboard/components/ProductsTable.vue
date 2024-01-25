@@ -15,7 +15,7 @@
     <div class="tableContainer">
       <div class="tableHeader">
         <span>Products Table</span>
-        <div class="circleIcon" @click="openUpdateOrCreateModal">
+        <div class="circleIcon" @click="openCreateProductModal">
           <font-awesome-icon
             :icon="['fab', 'searchengin']"
             :style="{ color: 'white' }"
@@ -32,22 +32,38 @@
         <span class="optionsHeader"></span>
       </div>
       <div class="listTable">
-        <div class="itemTable">
+        <div class="itemTable" v-for="product, index in products" :key="index">
           <div class="nameHeader itemInfo">
-            <span class="nameItem">name</span>
-            <div class="descriptionItem">description</div>
+            <span class="nameItem">{{product.name}}</span>
+            <div class="descriptionItem">{{product.description}}</div>
           </div>
-          <span class="amountHeader defaltFontIem">Quantity</span>
-          <span class="amountHeader defaltFontIem">Amount</span>
-          <span class="amountHeader defaltFontIem">Amount wholesale</span>
-          <span class="hasWholesaleHeader defaltFontIem">Has wholesale</span>
-          <span class="statusHeader defaltFontIem">Status</span>
+          <span class="amountHeader defaltFontIem">{{ product.quantity }}</span>
+          <span class="amountHeader defaltFontIem">{{ product.amount }}</span>
+          <span class="amountHeader defaltFontIem">{{ product.amountWholesale }}</span>
+          <span class="hasWholesaleHeader defaltFontIem">
+            <label class="switch">
+              <input type="checkbox" v-model="product.hasWholesale">
+              <span class="slider round" ></span>
+            </label>
+          </span>
+          <div class="statusHeader defaltFontIem">
+            <div class="stautsBadge" :class="product.statusCode">
+              {{ product.status }}
+            </div>
+          </div>
           <div class="optionsHeader defaltFontIem">
             <font-awesome-icon
-              :icon="['fas', 'ellipsis-vertical']"
+              :icon="['fas', 'pen-fancy']"
               :style="{ color: '#2D3748' }"
               size="lg"
-              class="searchIcon"
+              class="optionsIcon"
+              @click="openUpdateProductModal(product)"
+            />
+            <font-awesome-icon
+              :icon="['fas', 'eraser']"
+              :style="{ color: '#2D3748' }"
+              size="lg"
+              class="optionsIcon"
             />
           </div>
         </div>
@@ -57,10 +73,12 @@
     <Transition name="product">
       <UpdateOrCreateProduct
         v-if="isModalUpdateOrCreateOpen"
+        :isEdit="isEditProduct"
+        :productToEdit="productToEdit"
         @closeUpdateOrCreateModal="closeUpdateOrCreateModal"
         @successToast="successToast"
         @errorToast="errorToast"
-        :isEdit="isEditProduct"
+        @getProducts="getProducts"
       />
     </Transition>
 
@@ -70,28 +88,56 @@
 
 <script setup lang="ts">
 import UpdateOrCreateProduct from '../components/UpdateOrCreateProduct.vue'
-import { ref } from 'vue';
+import { ref, onMounted  } from 'vue';
 import type {Ref} from 'vue'
+import ToastNotification from "@/components/ToastNotification.vue";
+import useToasterStore from "@/stores/useToastStore";
+import { getProductsHelper } from '../helpers/productsHelper';
+import type { Product } from '../interfaces';
+
 const search: Ref<string> = ref('')
 const isEditProduct: Ref<boolean> = ref(false)
 const isModalUpdateOrCreateOpen: Ref<boolean> = ref(false)
-import ToastNotification from "@/components/ToastNotification.vue";
-import useToasterStore from "@/stores/useToastStore";
+const products: Ref<Product[]> = ref([])
+const productToEdit: Ref< Product > = ref({
+  name: '',
+  description: '',
+  quantity: 0,
+  amount: 0,
+  hasWholesale: false,
+  amountWholesale: undefined,
+  status: '',
+  imageUrl: ''
+
+})
 
 const toasterStore = useToasterStore();
 
 const successToast = () => toasterStore.success({ text: "Successfully created product" });
 const errorToast = () => toasterStore.error({ text: "Something went wrong" });
 
-function openUpdateOrCreateModal():void {
+onMounted(() => {
+  getProducts()
+})
+
+function openUpdateProductModal(product:Product):void {
+  isModalUpdateOrCreateOpen.value = true
+  isEditProduct.value = true
+  productToEdit.value = product
+}
+function openCreateProductModal():void {
   isModalUpdateOrCreateOpen.value = true
 }
+
 function closeUpdateOrCreateModal():void {
   isModalUpdateOrCreateOpen.value = false
+  isEditProduct.value = false
 }
 
 function getProducts() {
-  
+  getProductsHelper().then((data)=> {
+    products.value = data
+  })
 }
 </script>
 
@@ -211,5 +257,78 @@ function getProducts() {
 .defaltFontIem {
   font-size: 14px;
   font-weight: bold;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+input:checked + .slider {
+  background-color: #4FD1C5;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #4FD1C5;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+.stautsBadge {
+  width: 140px;
+  display: flex;
+  justify-content: center;
+  border-radius: 12px;
+  font-weight: bold;
+}
+.in_stock {
+  color: #3BA939;
+  background-color: #EAF8EA;
+}
+.low_stock {
+  color: #CE8623;
+  background-color: #FFF5E8;
+}
+.out_of_stock {
+  color: #E41E12;
+  background-color: #FFE5E4;
+}
+.optionsIcon {
+  cursor: pointer;
+  margin: 0 8px;
 }
 </style>
