@@ -1,15 +1,18 @@
 <template>
   <div>
-    <div class="">
-      <span class="filterTitle">Filters</span>
-      <div class="inputSearchContainer">
-        <font-awesome-icon
-          :icon="['fab', 'searchengin']"
-          :style="{ color: '#2D3748' }"
-          size="lg"
-          class="searchIcon"
-        />
-        <input type="text" class="inputSearch" v-model="search" placeholder="search...">
+    <div>
+      <div>
+        <span class="filterTitle">Filters</span>
+        <div class="inputSearchContainer" v-if="completedLoading">
+          <font-awesome-icon
+            :icon="['fab', 'searchengin']"
+            :style="{ color: '#2D3748' }"
+            size="lg"
+            class="searchIcon"
+          />
+          <input type="text" class="inputSearch" v-model="search" placeholder="search...">
+        </div>
+        <SkeletonLoader :width="260" :height="40" v-else/>
       </div>
     </div>
     <div class="tableContainer">
@@ -31,7 +34,7 @@
         <span class="statusHeader">Status</span>
         <span class="optionsHeader"></span>
       </div>
-      <div class="listTable">
+      <div class="listTable" v-if="completedLoading">
         <div class="itemTable" v-for="product, index in products" :key="index">
           <div class="nameHeader itemInfo">
             <span class="nameItem">{{product.name}}</span>
@@ -68,6 +71,14 @@
           </div>
         </div>
       </div>
+      <div class="tableSkeletons" v-else>
+        <SkeletonLoader :width="500" :height="40"/>
+        <SkeletonLoader :width="180" :height="40"/>
+        <SkeletonLoader :width="180" :height="40"/>
+        <SkeletonLoader :width="180" :height="40"/>
+        <SkeletonLoader :width="180" :height="40"/>
+        <SkeletonLoader :width="180" :height="40"/>
+      </div>
     </div>
 
     <Transition name="product">
@@ -94,9 +105,11 @@ import ToastNotification from "@/components/ToastNotification.vue";
 import useToasterStore from "@/stores/useToastStore";
 import { getProductsHelper } from '../helpers/productsHelper';
 import type { Product } from '../interfaces';
+import SkeletonLoader from './SkeletonLoader.vue';
 
 const search: Ref<string> = ref('')
 const isEditProduct: Ref<boolean> = ref(false)
+const completedLoading: Ref<boolean> = ref(false)
 const isModalUpdateOrCreateOpen: Ref<boolean> = ref(false)
 const products: Ref<Product[]> = ref([])
 const productToEdit: Ref< Product > = ref({
@@ -135,8 +148,10 @@ function closeUpdateOrCreateModal():void {
 }
 
 function getProducts() {
+  completedLoading.value = false
   getProductsHelper().then((data)=> {
     products.value = data
+    completedLoading.value = true
   })
 }
 </script>
@@ -151,6 +166,11 @@ function getProducts() {
 .product-enter-active,
 .product-leave-active {
   transition: 0.25s ease all;
+}
+.tableSkeletons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
 }
 .inputSearchContainer {
   display: flex;
