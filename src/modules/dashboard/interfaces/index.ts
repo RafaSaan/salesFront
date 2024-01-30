@@ -1,5 +1,5 @@
 export interface Product {
-  id?: string
+  id: number
   name: string
   description: string
   quantity: number
@@ -8,7 +8,7 @@ export interface Product {
   amountWholesale?: number
   status: string
   statusCode?: string
-  statusId?: string
+  statusId: number
   imageUrl?: string
 }
 export interface CreateProductPayload {
@@ -20,7 +20,7 @@ export interface CreateProductPayload {
   amountWholesale?: number
 }
 export interface UpdateProductPayload {
-  id?: string
+  id: number
   name: string
   description: string
   quantity: number

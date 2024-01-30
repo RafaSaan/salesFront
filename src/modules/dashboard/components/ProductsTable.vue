@@ -45,7 +45,10 @@
           <span class="amountHeader defaltFontIem">{{ product.amountWholesale }}</span>
           <span class="hasWholesaleHeader defaltFontIem">
             <label class="switch">
-              <input type="checkbox" v-model="product.hasWholesale">
+              <input
+                type="checkbox"
+                v-model="product.hasWholesale"
+                @click="enableOrDisableWholesale(product.id, product.hasWholesale)">
               <span class="slider round" ></span>
             </label>
           </span>
@@ -67,6 +70,7 @@
               :style="{ color: '#2D3748' }"
               size="lg"
               class="optionsIcon"
+              @click="deleteProduct(product.id)"
             />
           </div>
         </div>
@@ -103,7 +107,7 @@ import { ref, onMounted  } from 'vue';
 import type {Ref} from 'vue'
 import ToastNotification from "@/components/ToastNotification.vue";
 import useToasterStore from "@/stores/useToastStore";
-import { getProductsHelper } from '../helpers/productsHelper';
+import { getProductsHelper, deleteProductHelper, enableOrDisableWholesaleHelper } from '../helpers/productsHelper';
 import type { Product } from '../interfaces';
 import SkeletonLoader from './SkeletonLoader.vue';
 
@@ -113,6 +117,7 @@ const completedLoading: Ref<boolean> = ref(false)
 const isModalUpdateOrCreateOpen: Ref<boolean> = ref(false)
 const products: Ref<Product[]> = ref([])
 const productToEdit: Ref< Product > = ref({
+  id: 0,
   name: '',
   description: '',
   quantity: 0,
@@ -120,6 +125,7 @@ const productToEdit: Ref< Product > = ref({
   hasWholesale: false,
   amountWholesale: undefined,
   status: '',
+  statusId: 0,
   imageUrl: ''
 
 })
@@ -152,6 +158,26 @@ function getProducts() {
   getProductsHelper().then((data)=> {
     products.value = data
     completedLoading.value = true
+  })
+}
+function enableOrDisableWholesale(id: number, hasWholesale: boolean) {
+  enableOrDisableWholesaleHelper(id, !hasWholesale).then((success)=> {
+    if (success) {
+      toasterStore.success({ text: "Successfully updated product" })
+      getProducts()
+      return
+    }
+    errorToast()
+  })
+}
+function deleteProduct(id: number) {
+  deleteProductHelper(id).then((success)=> {
+    if (success) {
+      toasterStore.success({ text: "Successfully deleted product" })
+      getProducts()
+      return
+    }
+    errorToast()
   })
 }
 </script>

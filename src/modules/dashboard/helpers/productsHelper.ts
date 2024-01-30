@@ -2,19 +2,11 @@ import axios from "axios"
 import type { Product, CreateProductPayload, UpdateProductPayload } from "../interfaces"
 const api = import.meta.env.VITE_API_ENDPOINT
 
-export const createProductHelper = async(product: Product):Promise<boolean> => {
+export const createProductHelper = async(product: CreateProductPayload):Promise<boolean> => {
   let success:boolean = false
   try {
     const url = `${api}/createProduct`
-    const payload:CreateProductPayload = {
-      name: product.name,
-      description: product.description,
-      quantity: product.quantity,
-      amount: product.amount,
-      hasWholesale: product.hasWholesale,
-      amountWholesale: product.amountWholesale
-    }
-    await axios.post(url, {...payload})
+    await axios.post(url, {...product})
     success = true
   } catch(error) {
     success = false
@@ -38,7 +30,7 @@ export const updateProductHelper = async(product: Product):Promise<boolean> => {
       amountWholesale: product.amountWholesale,
       statusCode: product.statusCode
     }
-    await axios.post(url, {...payload})
+    await axios.put(url, {...payload})
     success = true
   } catch(error) {
     success = false
@@ -66,4 +58,32 @@ export const getProductsHelper = async():Promise<Product[]> => {
   }
 
   return products
+}
+export const enableOrDisableWholesaleHelper = async(id:number, hasWholesale: boolean):Promise<boolean> => {
+  let success:boolean = false
+
+  try {
+    const url = `${api}/enableOrDisableWholesaleProduct/${id}`
+    await axios.patch(url, {hasWholesale})
+    success = true
+  } catch(error) {
+    success = false
+    console.log(error)
+  }
+
+  return success
+}
+export const deleteProductHelper = async(id:number):Promise<boolean> => {
+  let success:boolean = false
+
+  try {
+    const url = `${api}/deleteProduct/${id}`
+    await axios.delete(url)
+    success = true
+  } catch(error) {
+    success = false
+    console.log(error)
+  }
+
+  return success
 }

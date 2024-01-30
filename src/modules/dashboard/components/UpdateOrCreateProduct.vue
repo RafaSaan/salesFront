@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Product} from '../interfaces/index.ts'
+import type { CreateProductPayload, Product} from '../interfaces/index.ts'
 const emit = defineEmits(['closeUpdateOrCreateModal', 'successToast', 'errorToast', 'getProducts']);
 const props = defineProps<{
   isEdit: boolean,
@@ -91,6 +91,7 @@ import type {Ref} from 'vue'
 import { createProductHelper, updateProductHelper } from '../helpers/productsHelper';
 
 const product: Ref< Product > = ref({
+  id: 0,
   name: '',
   description: '',
   quantity: 0,
@@ -99,7 +100,7 @@ const product: Ref< Product > = ref({
   amountWholesale: undefined,
   status: '',
   imageUrl: '',
-  statusId: ''
+  statusId: 0
 
 })
 const isCompleteForm: Ref<boolean> = ref(false)
@@ -134,7 +135,16 @@ function createOrUpdateProduct(event: Event):void {
   createProduct()
 }
 function createProduct():void {
-  createProductHelper(product.value).then((success)=> {
+  const productToCreate: Ref< CreateProductPayload > = ref({
+  name: product.value.name,
+  description: product.value.description,
+  quantity: product.value.quantity,
+  amount: product.value.amount,
+  hasWholesale: product.value.hasWholesale,
+  amountWholesale: product.value.amountWholesale,
+
+})
+  createProductHelper(productToCreate.value).then((success)=> {
     if (success) {
       emit('successToast')
       emit('getProducts')
